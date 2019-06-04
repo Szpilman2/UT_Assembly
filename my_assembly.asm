@@ -49,6 +49,7 @@ _start:
   xor edx,edx
   store:
     mov eax,[esi+edx]
+    add eax,12h
     mov [edi+edx],eax
     inc edx
 loop store
