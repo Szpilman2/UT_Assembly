@@ -66,7 +66,8 @@ doo:
 mov al,byte[read+ecx]
 add al,12
 mov byte[read+ecx],al
-inc ecx
+;inc ecx
+add ecx,4
 cmp ecx,r12d
 jb doo
 
