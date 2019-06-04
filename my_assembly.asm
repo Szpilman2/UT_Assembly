@@ -1,10 +1,12 @@
 section .data
   picture db "my_image.bmp"
+  new_pic db  "my_new_image.bmp"
 
 
 section .bss
 read resb  300000
 fd_in resb 1
+new_fd resb 1
 store_data resb 300000
 
 section .text
@@ -55,12 +57,27 @@ _start:
 loop store
 
      ;print the info
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, store_data
-    mov edx, 300000
-    int 80h
+    ;mov eax, 4
+    ;mov ebx, 1
+    ;mov ecx, store_data
+    ;mov edx, 300000
+    ;int 80h
+;-------------------------------------------------------
+;create and open new file for copying values
+mov eax,8
+mov ebx,new_pic
+mov ecx,777
+int 80h
 
+mov [new_fd],eax
+
+;-------------------------------------------------------
+;writing to the new file
+mov eax,4
+mov ebx,[new_fd]
+mov ecx,store_data
+mov edx,300000
+int 80h
 
 exit:
   mov eax, 1
