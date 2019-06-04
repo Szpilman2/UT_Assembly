@@ -3,7 +3,7 @@ section .data
 
 
 section .bss
-read resb  26
+read resb  300000
 fd_in resb 1
 store_data resb 24
 
@@ -34,30 +34,31 @@ _start:
    mov eax, 3
    mov ebx, [fd_in]
    mov ecx, read
-   mov edx, 26
+   mov edx, 300000
    int 80h
 
    ; close the file
   ;  mov eax, 6
   ;  mov ebx, [fd_in]
   ;  int  80h
-  mov ecx,24
-  mov esi,read
-  mov edi,store_data
-  add esi,2
-  xor edx,edx
-  store:
-    mov eax,[esi+edx]
-    mov [edi+edx],eax
-    inc edx
-loop store
+  ;program logic
+;  mov ecx,24
+;  mov esi,read
+;  mov edi,store_data
+;  add esi,2
+;  xor edx,edx
+;  store:
+;    mov eax,[esi+edx]
+;    mov [edi+edx],eax
+;    inc edx
+;loop store
 
     ; print the info
-    mov eax, 4
-    mov ebx, 1
-    mov ecx, store_data
-    mov edx, 24
-    int 80h
+  ;  mov eax, 4
+  ;  mov ebx, 1
+  ;  mov ecx, store_data
+  ;  mov edx, 24
+  ;  int 80h
 
 
 exit:
