@@ -5,7 +5,7 @@ section .data
 section .bss
 read resb  300000
 fd_in resb 1
-store_data resb 24
+store_data resb 300000
 
 section .text
   global _start
@@ -42,23 +42,23 @@ _start:
   ;  mov ebx, [fd_in]
   ;  int  80h
   ;program logic
-;  mov ecx,24
-;  mov esi,read
-;  mov edi,store_data
-;  add esi,2
-;  xor edx,edx
-;  store:
-;    mov eax,[esi+edx]
-;    mov [edi+edx],eax
-;    inc edx
-;loop store
+  mov ecx,261000
+  mov esi,read
+  mov edi,store_data
+  add esi,2
+  xor edx,edx
+  store:
+    mov eax,[esi+edx]
+    mov [edi+edx],eax
+    inc edx
+loop store
 
-    ; print the info
-  ;  mov eax, 4
-  ;  mov ebx, 1
-  ;  mov ecx, store_data
-  ;  mov edx, 24
-  ;  int 80h
+     ;print the info
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, store_data
+    mov edx, 300000
+    int 80h
 
 
 exit:
