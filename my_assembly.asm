@@ -1,13 +1,13 @@
 section .data
-  picture db "my_image.bmp"
-  new_pic db  "my_new_image.bmp"
+  picture dd '/home/peyman/Desktop/my_image.bmp'
+  new_pic dd '/home/peyman/Desktop/my_new_image.bmp'
 
 
 section .bss
 read resb  300000
 fd_in resb 1
 new_fd resb 1
-store_data resb 300000
+store_data resb 261000
 
 section .text
   global _start
@@ -24,37 +24,51 @@ _start:
 ;------------------
 
 ;change offset
- ;mov eax, 19
- ;mov ebx,r10d
- ;mov ecx, 0           ;for read only access
- ;mov edx, 2            ;SEEK_SET
- ;int  80h
+ mov eax, 19
+ mov ebx,[fd_in]
+ mov ecx, 0           ;for read only access
+ mov edx, 2            ;SEEK_SET
+ int  80h
 
- ;mov r12d,eax
+ mov r12d,eax
+;-------------------------------------
+mov eax,19
+mov ebx,[fd_in]
+mov ecx,0
+mov edx,0
+int 80h
+
+
+
  ;-------------------------------
  ;read file
    mov eax, 3
    mov ebx, [fd_in]
    mov ecx, read
-   mov edx, 300000
+   mov edx, r12d
    int 80h
 
-   ; close the file
-  ;  mov eax, 6
-  ;  mov ebx, [fd_in]
-  ;  int  80h
+
   ;program logic
-  mov ecx,261000
-  mov esi,read
-  mov edi,store_data
-  add esi,2
-  xor edx,edx
-  store:
-    mov eax,[esi+edx]
-    add eax,12h
-    mov [edi+edx],eax
-    inc edx
-loop store
+;  mov ecx,261000
+;  mov esi,read
+;  mov edi,store_data
+;  add esi,1000
+;  xor edx,edx
+;  store:
+;    mov al,byte[esi+edx]
+    ;add eax,12h
+;    mov byte[edi+edx],al
+;    inc edx
+;loop store
+mov ecx ,1000
+doo:
+mov al,byte[read+ecx]
+add al,12
+mov byte[read+ecx],al
+inc ecx
+cmp ecx,r12d
+jb doo
 
      ;print the info
     ;mov eax, 4
@@ -75,9 +89,17 @@ mov [new_fd],eax
 ;writing to the new file
 mov eax,4
 mov ebx,[new_fd]
-mov ecx,store_data
-mov edx,300000
+mov ecx,read
+mov edx,r12d
 int 80h
+
+
+; close the file
+  mov eax, 6
+  mov ebx, [new_fd]
+  int  80h
+
+
 
 exit:
   mov eax, 1
