@@ -1,7 +1,9 @@
 section .data
+text_to_write db 'hello world !',10
+len_text_to_write equ $-text_to_write
 msg_done  dd 'OK',10
 len_msg_done equ $-msg_done
-file_name dd '/home/peyman/Desktop/file_test.txt',10
+file_name dd '/home/peyman/Desktop/test.txt',10
 len_file_name equ $-file_name
 input_0  dd  '/home/Downloads',10
 len_input_0 equ  $-input_0
@@ -35,6 +37,8 @@ file_name_1 resd 10
 len_file_name_1 equ $-file_name_1
 read_buffer resb   300000
 len_read_buffer equ $-read_buffer
+write_buffer  resb   300000
+
 
 
 
@@ -201,6 +205,15 @@ read_file:
 
 ;----------------------------------------------------------------
 write_file:
+  call open_file
+  mov eax,4
+  mov ebx,[fd]
+  mov ecx,text_to_write
+  mov edx,len_text_to_write
+  int 80h
+  call operation_done
+  jmp give_select
+
 
 
 ;----------------------------------------------------------------
