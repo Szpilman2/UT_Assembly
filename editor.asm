@@ -1,7 +1,7 @@
 section .data
 text_to_write db 'hello world !',10
 len_text_to_write equ $-text_to_write
-msg_done  dd 'OK',10
+msg_done  dd 'operation done!',10
 len_msg_done equ $-msg_done
 file_name dd '/home/peyman/Desktop/test.txt',10
 len_file_name equ $-file_name
@@ -199,6 +199,15 @@ read_file:
   mov ecx,read_buffer
   mov edx,r12d
   int 80h
+
+  mov eax ,4
+  mov ebx ,1
+  mov ecx ,read_buffer
+  mov edx ,r12d
+  int 80h
+
+
+
   call operation_done
   jmp give_select
 
