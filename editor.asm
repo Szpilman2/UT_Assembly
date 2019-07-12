@@ -25,7 +25,12 @@ msg_7    dd  'enter 0 to exit.',10
 len_msg_7  equ  $-msg_7
 msg_8     dd  'select one of this options:',10
 len_msg_8  equ   $-msg_8
-
+msg_9     dd   'enter word to search',10
+len_msg_9 equ   $-msg_9
+msg_nfound dd  'word not found',10
+len_nfound equ $-msg_nfound
+position dd  5
+len_position equ $-position
 
 section .bss
 fd resb 1
@@ -38,8 +43,18 @@ len_file_name_1 equ $-file_name_1
 read_buffer resb   300000
 len_read_buffer equ $-read_buffer
 write_buffer  resb   300000
+word_number resd  1
+len_word_number  equ $-word_number
 
 
+;macro for change position of file pointer
+%macro change_position 1
+mov eax,19
+mov ebx,[fd]
+mov ecx,%1
+mov edx,0
+int 80h
+%endmacro
 
 
 
@@ -227,14 +242,119 @@ write_file:
 
 ;----------------------------------------------------------------
 search_file:
+;first reading file
+;detect file size
+  ;call open_file
+  ;mov eax, 19
+  ;mov ebx,[fd]
+  ;mov ecx, 0           ;for read only access
+  ;mov edx, 2            ;SEEK_SET
+  ;int  80h
+  ;mov r12d,eax
+
+  ;mov eax,19
+  ;mov ebx,[fd]
+  ;mov ecx,0
+  ;mov edx,0
+  ;int 80h
+
+  ;mov eax,3
+  ;mov ebx,[fd]
+  ;mov ecx,read_buffer
+  ;mov edx,r12d
+  ;int 80h
+
+
+;show msg for enter word to search
+  ;mov eax ,4
+  ;mov ebx ,1
+  ;mov ecx ,msg_9
+  ;mov edx ,len_msg_9
+  ;int 80h
+;giving input
+  ;mov eax ,3
+  ;mov ebx ,0
+  ;mov ecx ,input
+  ;mov edx ,len_input
+  ;int 80h
+  ;mov r13d,eax
+  ;dec r13d   ;size of input
+
+  ;xor edx,edx
+  ;xor ecx,ecx
+  ;mov esi,read_buffer
+;  mov ecx,r13d
+
+;  lp:  ;find first char of input in file
+;    mov dl,byte[esi]
+;    cmp dl,byte[input]
+;    je while
+;    inc esi
+;    cmp esi,r12d
+;    jbe lp
+;    call not_found
+;    jmp give_select
+
+;while:
+
+
+
+
+
+
+;call operation_done
+;jmp give_select
 
 ;----------------------------------------------------------------
 replace_file:
+call open_file
+;give position from user
+;give position from user require parsing string to integer!
+;mov eax ,3
+;mov ebx ,0
+;mov ecx ,position
+;mov edx ,len_position
+;int 80h
+
+change_position [position]
+;write to file
+mov eax,4
+mov ebx,[fd]
+mov ecx,text_to_write
+mov edx,len_text_to_write
+int 80h
+jmp read_file
+;call operation_done
+;jmp give_select
+
 
 
 ;----------------------------------------------------------------
 file_information:
+  call open_file
+  ;reading file
+  mov eax, 19
+  mov ebx,[fd]
+  mov ecx, 0           ;for read only access
+  mov edx, 2            ;SEEK_SET
+  int  80h
+  mov r12d,eax  ;size of file
 
+  mov eax,19   ;return file descriptor to first of file
+  mov ebx,[fd]
+  mov ecx,0
+  mov edx,0
+  int 80h
+
+  mov eax,3
+  mov ebx,[fd]
+  mov ecx,read_buffer
+  mov edx,r12d
+  int 80h
+  ;jmp words
+  jmp count_letters
+  call operation_done
+  call give_select
 
 ;------------------------------------------------------------------
 operation_done:
@@ -245,9 +365,96 @@ operation_done:
   int 80h
   ret
 ;-------------------------------------------------------------------
+not_found:
+  mov eax ,4
+  mov ebx ,1
+  mov ecx ,msg_nfound
+  mov edx ,len_nfound
+  int 80h
+  ret
+;--------------------------------------------------------------------
+words:
+xor ecx,ecx
+xor r9,r9
+mov r9d,1
+mov esi,read_buffer
+count_words:
+  inc ecx
+  mov dl,32   ;sapce ascii code
+  cmp dl,[esi]
+  je space
+  inc esi
+  cmp ecx,r12d
+  jbe count_words
+  jmp exit
+  ;ret
 
+space:
+  inc r9d
+  inc esi
+  ;inc ecx
+  cmp ecx,r12d
+  jbe count_words
+
+;print:                  ;has bug
+  ;mov [word_number],r9d
+  ;mov ax,[word_number]
+  ;mov eax ,4
+  ;mov ebx ,1
+  ;mov ecx ,word_number
+  ;mov edx ,2
+  ;int 80h
 
 ;--------------------------------------------------------------------
+count_letters:
+  xor r8,r8
+  xor r15,r15
+  mov esi,read_buffer
+  xor ecx, ecx
+count_capital_letters:
+  inc ecx
+  cmp ecx,r12d
+  ja count
+  mov dl,[esi]
+  cmp dl,41h  ;41h ----> A
+  jb next_2
+  cmp dl,5Ah  ;5Ah----->Z
+  ja next_2
+  jmp plus_capital
+
+count:
+mov esi,read_buffer
+xor ecx,ecx
+count_samll_letters:
+  inc ecx
+  cmp ecx,r12d
+  ja exit
+  mov dl,[esi]
+  cmp dl,61h   ;61h----->a
+  jb next_1
+  cmp dl,7Ah   ;7Ah----->z
+  ja next_1
+  jmp plus_small
+
+
+plus_capital:
+    inc esi
+    inc r8
+    jmp count_capital_letters
+
+plus_small:
+  inc esi
+  inc r15
+  jmp count_samll_letters
+
+next_1:
+inc esi
+jmp count_samll_letters
+
+next_2:
+inc esi
+jmp count_capital_letters
+;---------------------------------------------------------------------
 ;closing the file
 close_file:
   mov eax,6
